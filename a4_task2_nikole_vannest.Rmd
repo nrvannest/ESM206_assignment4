@@ -1,0 +1,76 @@
+---
+title: "a4_task2_nikole_vannest"
+author: "Nikole Vannest"
+date: "11/17/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(here)
+library(effsize)
+library(broom)
+library(palmerpenguins)
+library(ggbeeswarm)
+library(kableExtra)
+library(lubridate)
+library(scales
+        )
+
+hares <- read.csv(here("data", "bonanza_hares.csv"))
+```
+
+## Introduction:
+
+## Data and analyses
+
+## Exploratory findings
+
+### Observations and descriptive statistics
+
+```{r juvenile_cleanup, include = FALSE}
+juvenile <- hares %>% 
+  filter(age == "j") %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(year = year(date)) 
+
+juvenile_table <- juvenile %>% 
+  count(year) %>% 
+  summarize(
+    mean_count = mean(n),
+    median_count = median(n),
+    sd_count = sd(n),
+    max_count = max(n),
+    min_count = min(n)
+  )
+```
+
+
+**Table 1.** Descriptive statistics of the total observations per year of juvenile snowshoe hares. 
+
+```{r juvenile_summary, fig.align='center'}
+juvenile_table %>% 
+  kable(col.names = c("Mean count per year", "Median count per year", "Standard deviation", "Maximum per year", "Minimum per year")) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+The distribution of observations per year of juvenile hares is fairly extreme. The standard deviation very large considering the maximum and minimum observations. There seems to be a fairly steep decline in number of observations of juvenile snowshoe hares from 1999 to 2012.
+
+```{r basic_juvenile_plot, fig.align = "center"}
+ggplot(juvenile, aes(x = year)) +
+  geom_histogram(fill = "darkolivegreen4") +
+  labs(x = "Year",
+       y = "Juvenile Hare Count",
+       title = "Number of Juvenile Hares Observed per year from 1999-2012") +
+  scale_x_continuous(breaks = pretty_breaks(n = 12)) +
+  scale_y_continuous(breaks = pretty_breaks(n = 7)) +
+  theme_minimal()
+```
+
+**Figure 1.** Visual representation of the total number of observed juvenile hares from 1999 to 2012. The y axis depicts juvenile snowshoe hare count, with each year represented on the x axis. 
+
+**Major Takeaways** The number of juvenile snowshoe hares observed per year across all species and sites are included to get a better understand of how the distribution of observations varies from year to year. The maximum number of observations = `r juvenile_table$max_count` was found early on in 1999, and the minimum in 2008 at `r juvenile_table$min_count` with no observations reported in 2002 and 2009. The mean count per year is `r juvenile_table$mean_count`, and median count is `r juvenile_table$median_count` with a standard deviation of `r juvenile_table$sd_count`. It could be interpreted from the figure above that the decline in the number of juvenile snowshoe hare observations per year from 1999 to 2012 could be due to a decline in adult snowshoe hare reproduction, or decreased population levels. 
+
+
+  
