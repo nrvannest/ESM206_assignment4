@@ -47,7 +47,7 @@ juvenile_table <- juvenile %>%
 ```
 
 
-**Table 1.** Descriptive statistics of the total observations per year of juvenile snowshoe hares. 
+**Table 1.** Descriptive statistics of the total observations per year of juvenile snowshoe hares. *data here*
 
 ```{r juvenile_summary, fig.align='center'}
 juvenile_table %>% 
@@ -68,9 +68,54 @@ ggplot(juvenile, aes(x = year)) +
   theme_minimal()
 ```
 
-**Figure 1.** Visual representation of the total number of observed juvenile hares from 1999 to 2012. The y axis depicts juvenile snowshoe hare count, with each year represented on the x axis. 
+**Figure 1.** Visual representation of the total number of observed juvenile hares from 1999 to 2012. The y axis depicts juvenile snowshoe hare count, with each year represented on the x axis. *data here*
 
 **Major Takeaways** The number of juvenile snowshoe hares observed per year across all species and sites are included to get a better understand of how the distribution of observations varies from year to year. The maximum number of observations = `r juvenile_table$max_count` was found early on in 1999, and the minimum in 2008 at `r juvenile_table$min_count` with no observations reported in 2002 and 2009. The mean count per year is `r juvenile_table$mean_count`, and median count is `r juvenile_table$median_count` with a standard deviation of `r juvenile_table$sd_count`. It could be interpreted from the figure above that the decline in the number of juvenile snowshoe hare observations per year from 1999 to 2012 could be due to a decline in adult snowshoe hare reproduction, or decreased population levels. 
 
-
+```{r summary_stats_weight, include=FALSE}
+wt_count <- juvenile %>% 
+  group_by(sex, grid) %>% 
+  count()  
   
+wt_table <- juvenile %>%
+  group_by(sex, grid) %>%
+  summarize(
+    mean_weight = round(mean(na.omit(weight)), 2),
+    median_weight = round(median(na.omit(weight)), 2),
+    sd_weight = round(sd(na.omit(weight)), 2),
+    max_weight = max(na.omit(weight)),
+    min_weight = min(na.omit(weight))
+  ) %>%
+  cbind(count = wt_count$n)
+
+wt_avg <- juvenile %>% 
+  group_by(sex) %>% 
+  summarize(mean_weight = round(mean(na.omit(weight)), 2),
+            median_weight = round(median(na.omit(weight)), 2))
+```
+
+
+```{r juvenile_weight_by_sex, fig.align='center'}
+juvenile %>% 
+  ggplot(aes(x = sex, y = weight)) +
+  geom_beeswarm(aes(color = sex)) +
+  facet_wrap("grid") +
+  geom_boxplot(fill = NA, width = 0.2, outlier.color = NA) +
+  stat_summary(fun = mean, 
+               geom = "point", 
+               shape = 20, 
+               size = 4, 
+               color = "black", 
+               fill = "black") +
+  labs(x = "Sex",
+       y = "Weight in (g)",
+       title = "Juvenile Snowshoe Hare Weight Compared by Sex") +
+  scale_x_discrete(labels = c("Female", "Male", "N/A")) +
+  theme(legend.position = "none")
+
+```
+**Figure 2.** Juvenile snowshoe hare weight compared by sex across three sites. Weight in () is depicted on the y axis and visual separation by sex type on the x axis. There is a third category for N/A results included. The black point within the boxplots indicate the mean, and black line indicates the median value for each group. The end line of each box indicates the 25th and 75th percentile values, with the upper and lower whiskers indicating variability outside the upper and lower quartiles and outliers as individual points.
+
+
+**Major Takeaways** Mean and median values of within site comparison of male and female weights shows female weight tend to be slightly lower than male weights across all sites (female = `r wt_avg %>% filter(sex == "f") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_avg %>% filter(sex == "f") %>% select(median_weight) %>%  pull(median_weight)`) as compared to male = (`r wt_avg %>% filter(sex == "m") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_table %>% filter(sex == "m") %>% select(median_weight) %>% pull(median_weight)`). Sample sizes were much larger in bonrip than other sites (male = `r wt_table %>% filter(sex == "m" & grid == "bonrip") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonrip") %>% select(count) %>% pull(count)`) compared to bonmat (male = `r wt_table %>% filter(sex == "m" & grid == "bonmat") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonmat") %>% select(count) %>% pull(count)`) and bonbs (male = `r wt_table %>% filter(sex == "m" & grid == "bonbs") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonbs") %>% select(count) %>% pull(count)`). NA values have a smaller sample size and are inconclusive, with no NA observations in bonbs. 
+
