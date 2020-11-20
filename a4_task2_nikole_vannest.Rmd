@@ -15,19 +15,19 @@ library(palmerpenguins)
 library(ggbeeswarm)
 library(kableExtra)
 library(lubridate)
-library(scales
-        )
+library(scales)
 
 hares <- read.csv(here("data", "bonanza_hares.csv"))
 ```
 
-## Introduction:
+## Introduction
+Snowshoe hare (*Lepus americanus*), is found in northern boreal forests and is a keystone prey species to many top and middling predators. This study was conducted in 5 locations in the Tanana valley, Alaska from 1999 to 2012, via capture-recapture method. This species experiences fluctuations of 8-11-years. Comparisons of hare populations in Alaska have been limited to qualitative descriptions despite the drastic change in vegetation cover and predator densities that greatly impact *L. americanus* populations.
 
 ## Data and analyses
 
-## Exploratory findings
+In this study I will explore observed juvenile snowshoe hares over the years, utilizing an exploratory histogram as well as summary statistics to interpret my findings. I compare weight across sex and site, utilizing a beeswarm and boxplot with summary statistics as well to validate the information that is being presented. I also modelled hind foot length against weight, utilizing exploratory histogram and qqplots, as well as a linear model, t-test, Cohen's d test, and Pearson's r correlation. These statistical methods were used and interpreted to emphasize the significance of the information that is being presented here. 
 
-### Observations and descriptive statistics
+## Exploratory findings
 
 ```{r juvenile_cleanup, include = FALSE}
 juvenile <- hares %>% 
@@ -47,7 +47,7 @@ juvenile_table <- juvenile %>%
 ```
 
 
-**Table 1.** Descriptive statistics of the total observations per year of juvenile snowshoe hares. *data here*
+**Table 1.** Descriptive statistics of the total observations per year of juvenile snowshoe hares. Data: Kielland et. al. (2017). 
 
 ```{r juvenile_summary, fig.align='center'}
 juvenile_table %>% 
@@ -55,7 +55,6 @@ juvenile_table %>%
   kable_styling(bootstrap_options = "striped", full_width = FALSE)
 ```
 
-The distribution of observations per year of juvenile hares is fairly extreme. The standard deviation very large considering the maximum and minimum observations. There seems to be a fairly steep decline in number of observations of juvenile snowshoe hares from 1999 to 2012.
 
 ```{r basic_juvenile_plot, fig.align = "center"}
 ggplot(juvenile, aes(x = year)) +
@@ -68,15 +67,12 @@ ggplot(juvenile, aes(x = year)) +
   theme_minimal()
 ```
 
-**Figure 1.** Visual representation of the total number of observed juvenile hares from 1999 to 2012. The y axis depicts juvenile snowshoe hare count, with each year represented on the x axis. *data here*
+**Figure 1.** Visual representation of the total number of observed juvenile hares from 1999 to 2012. The y axis depicts juvenile snowshoe hare count, with each year represented on the x axis. Data: Kielland et. al. (2017). 
 
 **Major Takeaways** The number of juvenile snowshoe hares observed per year across all species and sites are included to get a better understand of how the distribution of observations varies from year to year. The maximum number of observations = `r juvenile_table$max_count` was found early on in 1999, and the minimum in 2008 at `r juvenile_table$min_count` with no observations reported in 2002 and 2009. The mean count per year is `r juvenile_table$mean_count`, and median count is `r juvenile_table$median_count` with a standard deviation of `r juvenile_table$sd_count`. It could be interpreted from the figure above that the decline in the number of juvenile snowshoe hare observations per year from 1999 to 2012 could be due to a decline in adult snowshoe hare reproduction, or decreased population levels. 
 
 ```{r summary_stats_weight, include=FALSE}
-wt_count <- juvenile %>% 
-  group_by(sex, grid) %>% 
-  count()  
-  
+#Summary statistics
 wt_table <- juvenile %>%
   group_by(sex, grid) %>%
   summarize(
@@ -84,18 +80,22 @@ wt_table <- juvenile %>%
     median_weight = round(median(na.omit(weight)), 2),
     sd_weight = round(sd(na.omit(weight)), 2),
     max_weight = max(na.omit(weight)),
-    min_weight = min(na.omit(weight))
-  ) %>%
-  cbind(count = wt_count$n)
+    min_weight = min(na.omit(weight)),
+    count = n()) 
 
-wt_avg <- juvenile %>% 
+#Create summary statistics table
+wt_avg  <- juvenile %>% 
   group_by(sex) %>% 
   summarize(mean_weight = round(mean(na.omit(weight)), 2),
-            median_weight = round(median(na.omit(weight)), 2))
+            median_weight = round(mean(na.omit(weight)), 2),
+            sd_weight = round(median(na.omit(weight)), 2),
+            count = n()
+            )
 ```
 
 
 ```{r juvenile_weight_by_sex, fig.align='center'}
+#Create graph comparing sex and weight across plots with summary statistics
 juvenile %>% 
   ggplot(aes(x = sex, y = weight)) +
   geom_beeswarm(aes(color = sex)) +
@@ -114,8 +114,100 @@ juvenile %>%
   theme(legend.position = "none")
 
 ```
-**Figure 2.** Juvenile snowshoe hare weight compared by sex across three sites. Weight in () is depicted on the y axis and visual separation by sex type on the x axis. There is a third category for N/A results included. The black point within the boxplots indicate the mean, and black line indicates the median value for each group. The end line of each box indicates the 25th and 75th percentile values, with the upper and lower whiskers indicating variability outside the upper and lower quartiles and outliers as individual points.
+**Figure 2.** Juvenile snowshoe hare weight compared by sex across three sites. Weight in () is depicted on the y axis and visual separation by sex type on the x axis. There is a third category for N/A results included. The black point within the boxplots indicate the mean, and black line indicates the median value for each group. The end line of each box indicates the 25th and 75th percentile values, with the upper and lower whiskers indicating variability outside the upper and lower quartiles and outliers as individual points. Data: Kielland et. al. (2017). 
 
 
 **Major Takeaways** Mean and median values of within site comparison of male and female weights shows female weight tend to be slightly lower than male weights across all sites (female = `r wt_avg %>% filter(sex == "f") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_avg %>% filter(sex == "f") %>% select(median_weight) %>%  pull(median_weight)`) as compared to male = (`r wt_avg %>% filter(sex == "m") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_table %>% filter(sex == "m") %>% select(median_weight) %>% pull(median_weight)`). Sample sizes were much larger in bonrip than other sites (male = `r wt_table %>% filter(sex == "m" & grid == "bonrip") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonrip") %>% select(count) %>% pull(count)`) compared to bonmat (male = `r wt_table %>% filter(sex == "m" & grid == "bonmat") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonmat") %>% select(count) %>% pull(count)`) and bonbs (male = `r wt_table %>% filter(sex == "m" & grid == "bonbs") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonbs") %>% select(count) %>% pull(count)`). NA values have a smaller sample size and are inconclusive, with no NA observations in bonbs. 
+
+
+**Table 2.** Comparing juvenile snowshoe hare weights between male and female groups with summary statistics including mean and standard deviation of weight across both sexes, and number of observations. 
+
+```{r summary_stats_pt3, include = FALSE}
+
+#Separate male and female to perform exploratory graphs and analyses
+hares_f <- juvenile %>% 
+  filter(sex == "f") %>% 
+  pull(weight) %>% 
+  na.omit()
+
+hares_m <- juvenile %>% 
+  filter(sex == "m") %>% 
+  pull(weight) %>% 
+  na.omit()
+
+# Plot histograms & qq-plots to check assumptions
+hist(hares_f) # Bell curve
+qqnorm(hares_f) # very linear
+
+hist(hares_m) # Fairly like a bell curve
+qqnorm(hares_m) # Linear enough
+
+#T-test
+hare_ttest <- t.test(hares_f, hares_m)
+
+#Cohen's d
+hare_cohend <- cohen.d(hares_f, hares_m)
+
+#Get difference in actual means
+diff_means <- abs(wt_avg %>% 
+  filter(sex == "f") %>% 
+  select(mean_weight)) -
+  (wt_avg %>% 
+  filter(sex == "m") %>% 
+  select(mean_weight))
+```
+
+```{r kable_weight_stats, fig.align = 'center'}
+#Create neat and clear table for html file
+wt_avg %>% 
+  kable(col.names = c("Sex", "Mean weight", "Median weight", "Standard deviation", "Count")) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+```
+
+**Major takeaways** On average observed female juvenile snowshoe hare weights are less than that of observed male weights. The difference in means between male and female hares (`r abs(diff_means)`) in (g). Cohen's D effect size is very low (`r hare_cohend$estimate`), and t-test give a p-value of (`r hare_ttest$p.value`). With the given statistics, we can safely reject the null hypothesis and assume male and female weights are significantly different groups. 
+
+```{r foot_lengths, fig.align='center'}
+hndft_lm  <- lm(data = juvenile, hindft~weight)
+sum_hndft <- glance(hndft_lm)
+
+hndft_cor <- cor.test(juvenile$hindft, juvenile$weight)
+
+juvenile %>% 
+  ggplot(aes(x = hindft, y = weight)) +
+  geom_jitter(color = "darkorchid3") +
+  geom_smooth(method = "lm",
+              color = "darkolivegreen4",
+              size = 0.8,
+              fill = "darkolivegreen4",
+              alpha = 0.2) +
+  labs(x = "Hind foot length (mm)",
+       y = "Weight (g)",
+       title = "Comparing Juvenile Snowshoe Hare Hind Foot Length (mm) to Weight (g)") +
+  theme_minimal() +
+  ggpubr::stat_regline_equation(label.x = 60, label.y = 150)
+
+```
+
+**Figure 3.** Juvenile snowshoe hare hind foot length in (mm) compared to weight (g) in purple. Green line depicts a linear regression model with a slope of -280 + 9.5x; the shading representing a 95% confidence interval. Data: Kielland et. al. (2017).
+
+**Major Takeaways** Juvenile snowshoe hare hind foot length and weight are positively correlated with an R^2^ value of (`r round(sum_hndft$r.squared, 3)`), a p-value of (`r sum_hndft$p.value`), and a Pearson's r correlation value of (`r round(hndft_cor$estimate, 3)`). Although our p-value is significant and Pearson's correlation value moderately correlated, we can see visually from the graph that the data points become more spread out as hind foot length and weight increases. Purely from visual interpretation, I would expect the strength of the linear model to explain trends in the data to be less significant as weight and hind foot length increase.
+
+## Summary
+- Overall, the average number of snowshoe hares over all sites being observed in traps is decreasing each year, with the highest observed population in 1999.
+- Female juvenile snowshoe hares tend to weigh less than male snowshoe hares over all sites.
+- Juvenile snowshoe hares are being observed the most at bonrip site.
+- The weight of juvenile snowshoe hares can be explained by hind foot length to a point.
+
+## Citations
+
+Kielland, K., F.S. Chapin, R.W. Ruess, and Bonanza Creek LTER. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present ver 22. Environmental Data Initiative. 
+
+
+
+
+
+
+
+
 
