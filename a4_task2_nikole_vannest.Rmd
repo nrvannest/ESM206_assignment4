@@ -87,8 +87,8 @@ wt_table <- juvenile %>%
 wt_avg  <- juvenile %>% 
   group_by(sex) %>% 
   summarize(mean_weight = round(mean(na.omit(weight)), 2),
-            median_weight = round(mean(na.omit(weight)), 2),
-            sd_weight = round(median(na.omit(weight)), 2),
+            median_weight = round(median(na.omit(weight)), 2),
+            sd_weight = round(sd(na.omit(weight)), 2),
             count = n()
             )
 ```
@@ -117,7 +117,7 @@ juvenile %>%
 **Figure 2.** Juvenile snowshoe hare weight compared by sex across three sites. Weight in () is depicted on the y axis and visual separation by sex type on the x axis. There is a third category for N/A results included. The black point within the boxplots indicate the mean, and black line indicates the median value for each group. The end line of each box indicates the 25th and 75th percentile values, with the upper and lower whiskers indicating variability outside the upper and lower quartiles and outliers as individual points. Data: Kielland et. al. (2017). 
 
 
-**Major Takeaways** Mean and median values of within site comparison of male and female weights shows female weight tend to be slightly lower than male weights across all sites (female = `r wt_avg %>% filter(sex == "f") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_avg %>% filter(sex == "f") %>% select(median_weight) %>%  pull(median_weight)`) as compared to male = (`r wt_avg %>% filter(sex == "m") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_table %>% filter(sex == "m") %>% select(median_weight) %>% pull(median_weight)`). Sample sizes were much larger in bonrip than other sites (male = `r wt_table %>% filter(sex == "m" & grid == "bonrip") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonrip") %>% select(count) %>% pull(count)`) compared to bonmat (male = `r wt_table %>% filter(sex == "m" & grid == "bonmat") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonmat") %>% select(count) %>% pull(count)`) and bonbs (male = `r wt_table %>% filter(sex == "m" & grid == "bonbs") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonbs") %>% select(count) %>% pull(count)`). NA values have a smaller sample size and are inconclusive, with no NA observations in bonbs. 
+**Major Takeaways** Mean and median values of within site comparison of male and female weights shows female weight tend to be slightly lower than male weights across all sites (female = `r wt_avg %>% filter(sex == "f") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_avg %>% filter(sex == "f") %>% select(median_weight) %>%  pull(median_weight)`) as compared to male = (`r wt_avg %>% filter(sex == "m") %>% select(mean_weight) %>%  pull(mean_weight)`, `r wt_avg %>% filter(sex == "m") %>% select(median_weight) %>% pull(median_weight)`). Sample sizes were much larger in bonrip than other sites (male = `r wt_table %>% filter(sex == "m" & grid == "bonrip") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonrip") %>% select(count) %>% pull(count)`) compared to bonmat (male = `r wt_table %>% filter(sex == "m" & grid == "bonmat") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonmat") %>% select(count) %>% pull(count)`) and bonbs (male = `r wt_table %>% filter(sex == "m" & grid == "bonbs") %>% select(count) %>% pull(count)`, female = `r wt_table %>% filter(sex == "f" & grid == "bonbs") %>% select(count) %>% pull(count)`). NA values have a smaller sample size and are inconclusive, with no NA observations in bonbs. 
 
 
 **Table 2.** Comparing juvenile snowshoe hare weights between male and female groups with summary statistics including mean and standard deviation of weight across both sexes, and number of observations. 
